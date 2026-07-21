@@ -1,0 +1,65 @@
+import os
+import requests
+from bs4 import BeautifulSoup
+
+URL = "https://entradas.todoshowcase.com/showcase/pelicula.aspx?filmid=5875"
+
+# FECHA OBJETIVO: Jueves 6 de Agosto
+FECHA_ISO_OBJETIVO = "2026-08-06"
+FECHA_TEXTO_OBJETIVO = "6/08"
+
+# Podés usar Variables de Entorno en Render o pegar los valores directo
+TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN", "8932905331:AAG6mOmCoPVjqvWWD0YpBRAZfi0Wm0jLf-E")
+TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID", "TU_CHAT_ID_AQUI")
+
+HEADERS = {
+    "User-Agent": (
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+        "AppleWebKit/537.36 (KHTML, like Gecko) "
+        "Chrome/120.0.0.0 Safari/537.36"
+    )
+}
+
+def enviar_telegram(mensaje):
+    url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
+    payload = {
+        "chat_id": TELEGRAM_CHAT_ID,
+        "text": mensaje,
+        "parse_mode": "HTML"
+    }
+    try:
+        requests.post(url, data=payload, timeout=10)
+    except Exception as e:
+        print(f"Error al enviar a Telegram: {e}")
+
+def consultar_entradas():
+    try:
+        session = requests.Session()
+        res_init = session.get(URL, headers=HEADERS, timeout=15)
+        soup = BeautifulSoup(res_init.text, 'html.parser')
+        
+        botones = soup.select("button.op_day")
+        encontrado = False
+        
+        for b in botones:
+            val = b.get("value", "")
+            txt = b.text
+            if FECHA_ISO_OBJETIVO in val or FECHA_TEXTO_OBJETIVO in txt:
+                encontrado = True
+                break
+                
+        if not encontrado and (FECHA_ISO_OBJETIVO in res_init.text or FECHA_TEXTO_OBJETIVO in res_init.text):
+            encontrado = True
+
+        if encontrado:
+            msg = f"<b>¡ENTRADAS HABILITADAS!</b>\nSe habilitó la fecha <b>Jue {FECHA_TEXTO_OBJETIVO}</b>.\n\nComprá acá: {URL}"
+            print(msg)
+            enviar_telegram(msg)
+        else:
+            print(f"Chequeo finalizado: Aún no está la fecha {FECHA_TEXTO_OBJETIVO}.")
+
+    except Exception as e:
+        print(f"Error en la consulta: {e}")
+
+if __name__ == "__main__":
+    consultar_entradas()
