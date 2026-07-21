@@ -10,7 +10,7 @@ FECHA_TEXTO_OBJETIVO = "6/08"
 
 # Podés usar Variables de Entorno en Render o pegar los valores directo
 TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN", "8932905331:AAG6mOmCoPVjqvWWD0YpBRAZfi0Wm0jLf-E")
-TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID", "TU_CHAT_ID_AQUI")
+TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID", "5892894506")
 
 HEADERS = {
     "User-Agent": (
